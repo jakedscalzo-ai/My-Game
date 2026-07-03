@@ -40,13 +40,35 @@ html, body{
 
 #gameover {
   position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  color:white;
-  font-size:30px;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.7);
   display:none;
+  z-index:100;
+  align-items:center;
+  justify-content:center;
   text-align:center;
+  color:white;
+}
+
+#gameoverBox {
+  background:#111;
+  padding:25px 30px;
+  border-radius:12px;
+  font-size:24px;
+  box-shadow:0 0 20px rgba(0,255,255,0.3);
+}
+
+#restartBtn {
+  margin-top:15px;
+  padding:10px 18px;
+  font-size:18px;
+  border:none;
+  border-radius:8px;
+  background:#00ffff;
+  color:black;
 }
 </style>
 </head>
@@ -77,8 +99,10 @@ Score: <span id="score">0</span>
 </div>
 
 <div id="gameover">
-GAME OVER<br>
-Press R to restart
+  <div id="gameoverBox">
+    GAME OVER<br>
+    <button id="restartBtn">Restart</button>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
@@ -108,6 +132,12 @@ let music = document.getElementById("music");
 let explosion = document.getElementById("explosion");
 
 init();
+
+document.getElementById("restartBtn").addEventListener("click", restart);
+
+document.getElementById("gameover").addEventListener("click", (e) => {
+  if (e.target.id === "gameover") restart();
+});
 
 function init(){
 
@@ -176,8 +206,10 @@ if(music.paused){
   music.play();
 }
 
-if(gameOver && e.key.toLowerCase()==="r") restart();
-if(gameOver) return;
+if(gameOver){
+  if(e.key.toLowerCase() === "r") restart();
+  return;
+}
 
 if(e.key === "ArrowLeft") lane = Math.max(0, lane-1);
 if(e.key === "ArrowRight") lane = Math.min(2, lane+1);
@@ -344,7 +376,8 @@ music.pause();
 explosion.currentTime = 0;
 explosion.play();
 
-document.getElementById("gameover").style.display = "block";
+let go = document.getElementById("gameover");
+go.style.display = "flex";
 }// ================= RESTART =================
 function restart(){
 gameOver = false;
@@ -353,7 +386,7 @@ lane = 1;
 speed = START_SPEED;
 
 document.getElementById("gameover").style.display = "none";
-document.getElementById("score").innerText = "0";
+document.getElementById("score").innerText = "0 | Speed: 0.200";
 
 for(let o of obstacles){
 scene.remove(o);
