@@ -1,466 +1,69 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<title>3 Lane Runner + Music (Fixed)</title>
+<meta charset="UTF-8">
+<title>Jake's Arcade Hub</title>
 
 <style>
-html, body{
-    margin:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    touch-action:none;
-    overscroll-behavior:none;
-    font-family:Arial;
+body {
+  margin: 0;
+  background: black;
+  color: white;
+  font-family: Arial;
 }
 
-
-#controls {
-  position:fixed;
-  top:10px;
-  left:10px;
-  color:white;
-  z-index:10;
-  font-size:14px;
-  line-height:1.4em;
+/* LEFT MENU */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: 220px;
+  background: black;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  gap: 15px;
 }
 
-#scoreUI {
-  position:fixed;
-  top:10px;
-  left:50%;
-  transform:translateX(-50%);
-  color:white;
-  z-index:10;
-  font-size:18px;
+/* TITLE */
+h1 {
+  font-size: 22px;
+  color: cyan;
+  margin-bottom: 20px;
 }
 
-#gameover {
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.7);
-  display:none;
-  z-index:100;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  color:white;
+/* BUTTONS */
+button {
+  padding: 12px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: cyan;
+  color: black;
 }
 
-#gameoverBox {
-  background:#111;
-  padding:25px 30px;
-  border-radius:12px;
-  font-size:24px;
-  box-shadow:0 0 20px rgba(0,255,255,0.3);
-}
-
-#restartBtn {
-  margin-top:15px;
-  padding:10px 18px;
-  font-size:18px;
-  border:none;
-  border-radius:8px;
-  background:#00ffff;
-  color:black;
+button:hover {
+  background: white;
 }
 </style>
 </head>
 
-<body ontouchstart="">
+<body>
 
-<!-- 🎵 MUSIC -->
-<audio id="music" loop>
-  <source src="trillium.mp3" type="audio/mpeg">
-</audio>
+<div class="sidebar">
+  <h1>🎮 Arcade Hub</h1>
 
-<!-- 💥 EXPLOSION -->
-<audio id="explosion">
-  <source src="explosion.mp3" type="audio/mpeg">
-</audio>
+  <button onclick="location.href='neondash.html'">
+    Neon Dash
+  </button>
 
-<div id="controls">
-Controls:<br>
-Left Arrow = Move Left<br>
-Right Arrow = Move Right<br>
-Up Arrow = Jump<br>
-Down Arrow = Crouch / Slide<br>
-R = Restart
+  <button onclick="location.href='rhythm.html'">
+    🎹 Piano Game
+  </button>
+
 </div>
-
-<div id="scoreUI">
-Score: <span id="score">0</span>
-</div>
-
-<div id="gameover">
-  <div id="gameoverBox">
-    GAME OVER<br>
-    <button id="restartBtn">Restart</button>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
-
-<script>
-
-// ================= CORE =================
-let scene, camera, renderer;
-let player;
-let obstacles = [];
-
-let lanes = [-2, 0, 2];
-let lane = 1;
-
-let START_SPEED = 0.20;
-let MAX_SPEED = 1.80;
-
-let speed = START_SPEED;
-
-let score = 0;
-let gameOver = false;
-
-let jumping = false;
-let sliding = false;
-
-let music = document.getElementById("music");
-let explosion = document.getElementById("explosion");
-
-init();
-
-document.getElementById("restartBtn").addEventListener("click", restart);
-
-document.getElementById("gameover").addEventListener("click", (e) => {
-  if (e.target.id === "gameover") restart();
-});
-
-function init(){
-
-scene = new THREE.Scene();
-scene.background = new THREE.Color(0x050510);
-
-camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 1000);
-camera.position.set(0,4,8);
-
-renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth, innerHeight);
-
-renderer.domElement.style.position = "fixed";
-renderer.domElement.style.top = "0";
-renderer.domElement.style.left = "0";
-renderer.domElement.style.width = "100%";
-renderer.domElement.style.height = "100%";
-renderer.domElement.style.touchAction = "none";
-
-document.body.appendChild(renderer.domElement);
-// LIGHT
-scene.add(new THREE.AmbientLight(0xffffff,0.8));
-
-// ================= LANES =================
-for(let i=0;i<3;i++){
-
-let line = new THREE.Mesh(
-new THREE.BoxGeometry(0.05,0.1,200),
-new THREE.MeshStandardMaterial({color:0x00ffff})
-);
-
-line.position.x = lanes[i];
-line.position.y = 0.01;
-scene.add(line);
-}
-
-// FLOOR
-for(let i=0;i<3;i++){
-
-let strip = new THREE.Mesh(
-new THREE.PlaneGeometry(2,200),
-new THREE.MeshStandardMaterial({
-color: i===1 ? 0x111122 : 0x0a0a1a,
-emissive: i===1 ? 0x002233 : 0x000000
-})
-);
-
-strip.rotation.x = -Math.PI/2;
-strip.position.x = lanes[i];
-scene.add(strip);
-}
-
-// ================= PLAYER =================
-player = new THREE.Mesh(
-new THREE.SphereGeometry(0.5),
-new THREE.MeshStandardMaterial({color:0x00ffff})
-);
-player.position.y = 0.5;
-scene.add(player);
-
-// ================= INPUT =================
-window.addEventListener("keydown", (e)=>{
-
-if(music.paused){
-  music.currentTime = 0;
-  music.play();
-}
-
-if(gameOver){
-  if(e.key.toLowerCase() === "r") restart();
-  return;
-}
-
-if(e.key === "ArrowLeft") lane = Math.max(0, lane-1);
-if(e.key === "ArrowRight") lane = Math.min(2, lane+1);
-
-if(e.key === "ArrowUp") jump();
-if(e.key === "ArrowDown") slide();
-});
-
-// ================= MOBILE TOUCH CONTROLS =================
-
-let touchStartX = 0;
-let touchStartY = 0;
-let touchActive = false;
-
-window.addEventListener("touchstart", (e) => {
-  touchActive = true;
-  touchStartX = e.touches[0].clientX;
-  touchStartY = e.touches[0].clientY;
-}, { passive: true });
-
-window.addEventListener("touchend", (e) => {
-  if (!touchActive) return;
-  touchActive = false;
-
-  let dx = e.changedTouches[0].clientX - touchStartX;
-  let dy = e.changedTouches[0].clientY - touchStartY;
-
-  if (Math.abs(dx) > Math.abs(dy)) {
-    if (dx > 40) lane = Math.min(2, lane + 1);
-    else if (dx < -40) lane = Math.max(0, lane - 1);
-  } else {
-    if (dy < -40) jump();
-    else if (dy > 40) slide();
-  }
-}, { passive: true });
-
-
-
-window.addEventListener("resize", () => {
-  camera.aspect = innerWidth / innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
-});
-
-// SPAWN LOOP
-setInterval(()=>{
-if(!gameOver) spawnObstacle();
-}, 700);
-
-animate();
-}// ================= OBSTACLES =================
-function spawnObstacle(){
-
-let type = Math.floor(Math.random()*3);
-
-// 0 = wall gap
-// 1 = floor block (orange)
-// 2 = ceiling block (green)
-
-if(type === 0){
-
-let gap = Math.floor(Math.random()*3);
-
-for(let i=0;i<3;i++){
-if(i === gap) continue;
-
-let o = new THREE.Mesh(
-new THREE.BoxGeometry(1.8,3.5,1),
-new THREE.MeshStandardMaterial({color:0xff0055})
-);
-
-o.position.set(lanes[i],1.75,-60);
-o.userData.type = 0;
-
-scene.add(o);
-obstacles.push(o);
-}
-
-return;
-}
-
-if(type === 1){
-
-let o = new THREE.Mesh(
-new THREE.BoxGeometry(6,1.5,1),
-new THREE.MeshStandardMaterial({color:0xffaa00})
-);
-
-o.position.set(0,0.75,-60);
-o.userData.type = 1;
-
-scene.add(o);
-obstacles.push(o);
-return;
-}
-
-if(type === 2){
-
-let o = new THREE.Mesh(
-new THREE.BoxGeometry(6,1.5,1),
-new THREE.MeshStandardMaterial({color:0x00ff88})
-);
-
-o.position.set(0,2.5,-60);
-o.userData.type = 2;
-
-scene.add(o);
-obstacles.push(o);
-return;
-}
-}
-
-// ================= JUMP =================
-function jump(){
-if(jumping) return;
-jumping = true;
-
-let startY = player.position.y;
-let peak = 2;
-
-let upTime = 160;
-let upVel = (peak - startY) / (upTime / 16);
-
-let up = setInterval(()=>{
-player.position.y += upVel;
-
-if(player.position.y >= peak){
-player.position.y = peak;
-clearInterval(up);
-
-let down = setInterval(()=>{
-player.position.y -= upVel;
-
-if(player.position.y <= startY){
-player.position.y = startY;
-jumping = false;
-clearInterval(down);
-}
-},16);
-
-}
-},16);
-}
-
-// ================= SLIDE =================
-function slide(){
-if(sliding) return;
-sliding = true;
-
-player.scale.y = 0.4;
-
-setTimeout(()=>{
-player.scale.y = 1;
-sliding = false;
-},280);
-}
-
-// ================= GAME OVER =================
-function endGame(){
-gameOver = true;
-
-music.pause();
-
-explosion.currentTime = 0;
-explosion.play();
-
-let go = document.getElementById("gameover");
-go.style.display = "flex";
-}// ================= RESTART =================
-function restart(){
-gameOver = false;
-score = 0;
-lane = 1;
-speed = START_SPEED;
-
-document.getElementById("gameover").style.display = "none";
-document.getElementById("score").innerText = "0 | Speed: 0.200";
-
-for(let o of obstacles){
-scene.remove(o);
-}
-obstacles = [];
-
-player.position.set(0,0.5,0);
-player.scale.set(1,1,1);
-
-music.currentTime = 0;
-music.play();
-}
-
-// ================= LOOP =================
-function animate(){
-requestAnimationFrame(animate);
-
-if(!gameOver){
-
-player.position.x += (lanes[lane] - player.position.x) * 0.18;
-
-// ================= SPEED CAP SYSTEM =================
-// score keeps going forever, but speed caps at 2500
-if(score < 3000){
-    speed += 0.00025;
-}
-
-// hard clamp (extra safety)
-if(speed > MAX_SPEED) speed = MAX_SPEED;
-
-// ================= MOVE PLAYER CAMERA =================
-for(let o of obstacles){
-o.position.z += speed;
-
-// ================= FIXED COLLISION =================
-let dz = Math.abs(o.position.z - player.position.z);
-
-if(dz < 0.8){
-
-    // wall gap (lane-based)
-    if(o.userData.type === 0){
-        let dx = Math.abs(o.position.x - player.position.x);
-        if(dx < 0.9) endGame();
-    }
-
-    // floor block (orange) -> must jump
-    else if(o.userData.type === 1){
-        if(!jumping) endGame();
-    }
-
-    // ceiling block (green) -> must slide
-    else if(o.userData.type === 2){
-        if(!sliding) endGame();
-    }
-}
-
-}
-
-// cleanup
-obstacles = obstacles.filter(o => o.position.z < 10);
-
-// score increases forever
-score++;
-document.getElementById("score").innerText =
-score + " | Speed: " + (speed >= MAX_SPEED ? "MAX" : speed.toFixed(3));
-
-camera.position.x = player.position.x;
-camera.lookAt(player.position.x,0.5,0);
-
-}
-
-renderer.render(scene,camera);
-}
-</script>
 
 </body>
 </html>
