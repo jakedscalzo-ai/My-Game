@@ -29,8 +29,12 @@ body{
 
 #game{
     position:relative;
-    width:520px;
-    height:900px;
+    width:95vw;
+    max-width:520px;
+
+    height:85vh;
+    max-height:900px;
+
     background:#222;
     overflow:hidden;
     border:4px solid #555;
@@ -51,7 +55,7 @@ body{
 .lane{
     position:absolute;
     top:0;
-    width:130px;
+    width:25%;
     height:900px;
     background:#2b2b2b;
 }
@@ -82,7 +86,7 @@ body{
 .pad{
     position:absolute;
     bottom:140px;
-    width:130px;
+    width:25%;
     height:80px;
     background:transparent;
     z-index:35;
@@ -93,7 +97,7 @@ body{
 
 .note{
     position:absolute;
-    width:126px;
+    width:calc(25% - 4px);;
     height:80px;
     background:#00ff66;
     border-radius:10px;
@@ -131,23 +135,23 @@ button{
 
 <div id="score">Score: 0</div>
 
-<div class="lane" style="left:0px"></div>
-<div class="lane" style="left:130px"></div>
-<div class="lane" style="left:260px"></div>
-<div class="lane" style="left:390px"></div>
+<div class="lane" style="left:0%"></div>
+<div class="lane" style="left:25%"></div>
+<div class="lane" style="left:50%"></div>
+<div class="lane" style="left:75%"></div>
 
-<div class="line" style="left:0px"></div>
-<div class="line" style="left:130px"></div>
-<div class="line" style="left:260px"></div>
-<div class="line" style="left:390px"></div>
-<div class="line" style="left:520px"></div>
+<div class="line" style="left:0%"></div>
+<div class="line" style="left:25%"></div>
+<div class="line" style="left:50%"></div>
+<div class="line" style="left:75%"></div>
+<div class="line" style="left:100%"></div>
 
 <div id="judgeLine"></div>
 
-<div class="pad" id="pad0" style="left:0px"></div>
-<div class="pad" id="pad1" style="left:130px"></div>
-<div class="pad" id="pad2" style="left:260px"></div>
-<div class="pad" id="pad3" style="left:390px"></div>
+<div class="pad" id="pad0" style="left:0%"></div>
+<div class="pad" id="pad1" style="left:25%"></div>
+<div class="pad" id="pad2" style="left:50%"></div>
+<div class="pad" id="pad3" style="left:75%"></div>
 
 <div id="gameover">
     GAME OVER
@@ -177,7 +181,9 @@ const pads = [
     document.getElementById("pad3")
 ];
 
-const lanes = [0,130,260,390];
+function getLaneX(lane){
+    return lane * (game.clientWidth / 4);
+}
 
 const keyMap = {
     "d":0,
@@ -192,7 +198,16 @@ let speed = 4;
 let spawnDelay = 700;
 let playing = true;
 
-const HIT_Y = 720;
+let HIT_Y = 0;
+
+function updateHitY(){
+    const judgeLine = document.getElementById("judgeLine");
+    HIT_Y = judgeLine.offsetTop + judgeLine.offsetHeight / 2;
+}
+
+updateHitY();
+window.addEventListener("resize", updateHitY);
+window.addEventListener("load", updateHitY);
 
 function spawnNote(){
 
@@ -210,7 +225,7 @@ function spawnNote(){
 
     const note = document.createElement("div");
     note.className = "note";
-    note.style.left = lanes[lane] + "px";
+    note.style.left = getLaneX(lane) + "px";
     note.style.top = "-80px";
 
     game.appendChild(note);
@@ -251,7 +266,7 @@ function update(){
 
         note.element.style.top = note.y + "px";
 
-        if(note.y > HIT_Y){
+        if(note.y + 40 > HIT_Y + 70){
 
             note.element.style.background = "#ff3333";
 
@@ -294,7 +309,7 @@ function pressLane(lane){
 
         if(note.lane !== lane) continue;
 
-        if(Math.abs((note.y+40)-HIT_Y) < 45){
+        if(Math.abs((note.y+40)-HIT_Y) < 70){
 
             hit = i;
             break;
@@ -304,11 +319,8 @@ function pressLane(lane){
     }
 
     if(hit === -1){
-
-        endGame();
-        return;
-
-    }
+    return;
+}
 
     notes[hit].element.remove();
     notes.splice(hit,1);
@@ -338,7 +350,7 @@ game.addEventListener("touchstart",(e)=>{
 
         const x = touch.clientX - rect.left;
 
-        let lane = Math.floor(x/130);
+        let lane = Math.floor(x / (rect.width / 4));
 
         if(lane < 0) lane = 0;
         if(lane > 3) lane = 3;
