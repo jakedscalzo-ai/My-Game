@@ -260,11 +260,38 @@ ctx.textAlign="center";
 if(state==="menu"){
   ctx.fillStyle=C.bg;
   ctx.fillRect(0,0,960,480);
+
   ctx.fillStyle=C.khaki;
-  ctx.font = "36px DevilFont";
-  ctx.fillText("LEVEL DEVIL",480,200);
-  ctx.font = "20px DevilFont";
-  ctx.fillText("Press ENTER to start",480,240);
+  ctx.font="36px DevilFont";
+  ctx.fillText("LEVEL DEVIL",480,180);
+
+  ctx.font="20px DevilFont";
+  ctx.fillText("Press ENTER to start",480,220);
+
+  /* BACK TO HUB BUTTON */
+  const hubX=380;
+  const hubY=280;
+  const hubW=200;
+  const hubH=50;
+
+  ctx.fillStyle="#2ecc71";
+  ctx.fillRect(hubX,hubY,hubW,hubH);
+
+  ctx.fillStyle="white";
+  ctx.font="20px Arial";
+  ctx.fillText("BACK TO HUB",480,312);
+
+  if(
+    mouse.click &&
+    mouse.x>hubX &&
+    mouse.x<hubX+hubW &&
+    mouse.y>hubY &&
+    mouse.y<hubY+hubH
+  ){
+    mouse.click=false;
+    location.href="index.html";
+  }
+
   return;
 }
 
@@ -306,26 +333,79 @@ if(state==="gameover"){
   ctx.font = "20px DevilFont";
   ctx.fillText("Bot can play better than you",480,210);
 
-  const bx=380,by=260,bw=200,bh=50;
-  ctx.fillStyle=C.hunter;
-  ctx.fillRect(bx,by,bw,bh);
-  ctx.fillStyle=C.khaki;
-  ctx.font="20px Arial";
-  ctx.fillText("TRY AGAIN NOOB",480,292);
+const bx=380,by=250,bw=200,bh=50;
+ctx.fillStyle=C.hunter;
+ctx.fillRect(bx,by,bw,bh);
+ctx.fillStyle=C.khaki;
+ctx.font="20px Arial";
+ctx.fillText("TRY AGAIN NOOB",480,282);
 
-  if(mouse.click && mouse.x>bx && mouse.x<bx+bw && mouse.y>by && mouse.y<by+bh){
-    mouse.click=false; startGame();
-  }
-  return;
+if(mouse.click &&
+   mouse.x>bx && mouse.x<bx+bw &&
+   mouse.y>by && mouse.y<by+bh){
+  mouse.click=false;
+  startGame();
+}
+
+/* BACK TO HUB BUTTON */
+const hubX=380, hubY=320, hubW=200, hubH=50;
+
+ctx.fillStyle="#2ecc71"; // green
+ctx.fillRect(hubX,hubY,hubW,hubH);
+
+ctx.fillStyle="white";
+ctx.font="20px Arial";
+ctx.fillText("BACK TO HUB",480,352);
+if(
+  mouse.click &&
+  mouse.x > hubX &&
+  mouse.x < hubX + hubW &&
+  mouse.y > hubY &&
+  mouse.y < hubY + hubH
+){
+  mouse.click = false;
+  location.href = "index.html";
+}
+
+return;
 }
 
 /* END */
 if(state==="end"){
   ctx.fillStyle=C.bg;
   ctx.fillRect(0,0,960,480);
+
   ctx.fillStyle=C.khaki;
-  ctx.font = "36px DevilFont";
-  ctx.fillText("GAME ENDS CHIGGA",480,240);
+  ctx.font="36px DevilFont";
+  ctx.fillText("YOU WIN!",480,200);
+
+  ctx.font="20px DevilFont";
+  ctx.fillText("Congratulations!",480,240);
+
+  /* BACK TO HUB BUTTON */
+  const hubX=380;
+  const hubY=300;
+  const hubW=200;
+  const hubH=50;
+
+  ctx.fillStyle="#2ecc71";
+  ctx.fillRect(hubX,hubY,hubW,hubH);
+
+  ctx.fillStyle="white";
+  ctx.font="20px Arial";
+  ctx.fillText("BACK TO HUB",480,332);
+
+  if(
+    mouse.click &&
+    mouse.x > hubX &&
+    mouse.x < hubX + hubW &&
+    mouse.y > hubY &&
+    mouse.y < hubY + hubH
+  ){
+    mouse.click = false;
+    location.href = "index.html";
+  }
+
   return;
 }
 
