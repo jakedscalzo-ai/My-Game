@@ -25,19 +25,14 @@
             padding: 20px; /* Add padding for smaller screens */
         }
         #hubButton{
-    position:fixed;
-    right:20px;
-    top:50%;
-    transform:translateY(-50%);
     background:#8f7a66;
     color:#f9f6f2;
     border:none;
-    border-radius:10px;
-    padding:14px 22px;
-    font-size:20px;
+    border-radius:6px;
+    padding:8px 12px;
+    font-size:14px;
     font-weight:bold;
     cursor:pointer;
-    z-index:1000;
 }
 
 #hubButton:hover{
@@ -53,11 +48,11 @@
         /* Header: Title and Score */
         .header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 20px;
             width: 100%;
             max-width: min(90vw, 90vh, 500px); /* Match grid width */
-            margin-bottom: 20px;
             margin: 0 auto 20px auto; /* Center horizontally with bottom margin */
         }
 
@@ -65,6 +60,7 @@
             font-size: 4em;
             font-weight: bold;
             color: #776e65;
+            margin-bottom: -5px;
         }
 
         /* Score Boxes */
@@ -309,19 +305,23 @@
 </head>
 <body>
 
-<button id="hubButton"
-onclick="location.href='index.html'">
-Back to Hub
-</button>
+
 
     <div class="game-container">
         <div class="header">
             <h1 class="title">2048</h1>
-            <div class="score-info" style="display: flex; gap: 10px;">
+
+            <button id="hubButton"
+                    onclick="location.href='index.html'">
+                Back To Hub
+            </button>
+
+            <div class="score-info" style="display:flex;gap:10px;">
                 <div class="score-container">
                     <span>SCORE</span>
                     <div id="score" class="score-value">0</div>
                 </div>
+
                 <div class="best-container">
                     <span>BEST</span>
                     <div id="best-score" class="best-value">0</div>
