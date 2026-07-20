@@ -312,31 +312,57 @@ document.addEventListener('keydown',e=>{
   if(keys[e.key]) return;
   keys[e.key]=true;
   initAc();
-  if(gs==='title'){startGame();return;}
-  if(gs==='gameOver'){
-    if(e.key==='r'||e.key==='R'||e.key==='Enter'||e.key===' '){startGame();return;}
-    if(e.key==='s'||e.key==='S'){gs='shop';shopTab='skins';return;}
+
+  if(gs==='title'){
+    startGame();
+    return;
   }
+
   if(gs==='playing'){
-    const m={ArrowUp:'up',ArrowDown:'dn',ArrowLeft:'lt',ArrowRight:'rt',
-             w:'up',s:'dn',a:'lt',d:'rt',W:'up',S:'dn',A:'lt',D:'rt'};
-    if(m[e.key]) kbuf=m[e.key];
+    if(e.key==='ArrowUp'||e.key==='w'||e.key==='W') kbuf='up';
+    if(e.key==='ArrowDown'||e.key==='s'||e.key==='S') kbuf='dn';
+    if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A') kbuf='lt';
+    if(e.key==='ArrowRight'||e.key==='d'||e.key==='D') kbuf='rt';
   }
 });
-document.addEventListener('keyup',e=>{keys[e.key]=false;});
+
+document.addEventListener('keyup',e=>{
+  keys[e.key]=false;
+});
 canvas.addEventListener('click',e=>{
   initAc();
+
   const r=canvas.getBoundingClientRect();
-  const mx=(e.clientX-r.left)*(W/r.width), my=(e.clientY-r.top)*(H/r.height);
-  if(gs==='title'){startGame();}
-  else if(gs==='gameOver'){
-    // Play Again button
-    if(inBtn(mx,my,192,368,196,48)){startGame();return;}
-    // Shop button
-    if(inBtn(mx,my,452,368,172,48)){gs='shop';shopTab='skins';return;}
-    // Default: click anywhere = play again
+  const mx=(e.clientX-r.left)*(W/r.width);
+  const my=(e.clientY-r.top)*(H/r.height);
+
+  if(gs==='title'){
     startGame();
-  } else if(gs==='shop'){
+    return;
+  }
+
+  if(gs==='gameOver'){
+
+    if(inBtn(mx,my,180,360,200,48)){
+      startGame();
+      return;
+    }
+
+    if(inBtn(mx,my,420,360,180,48)){
+      gs='shop';
+      shopTab='skins';
+      return;
+    }
+
+    if(inBtn(mx,my,300,425,200,48)){
+      window.location.href = "index.html";
+      return;
+    }
+
+    return;
+  }
+
+  if(gs==='shop'){
     handleShopClick(mx,my);
   }
 });
@@ -356,13 +382,25 @@ canvas.addEventListener('touchstart', e => {
   initAc();
   const {x:mx, y:my} = touchToCanvas(e.touches[0]);
   if(gs==='title'){startGame();return;}
-  if(gs==='gameOver'){
-    if(inBtn(mx,my,192,368,196,48)){startGame();return;}
-    if(inBtn(mx,my,452,368,172,48)){gs='shop';shopTab='skins';return;}
-    startGame();
-  } else if(gs==='shop'){
-    handleShopClick(mx,my);
-  }
+if(gs==='gameOver'){
+    if(inBtn(mx,my,180,360,200,48)){
+        startGame();
+        return;
+    }
+
+    if(inBtn(mx,my,420,360,180,48)){
+        gs='shop';
+        shopTab='skins';
+        return;
+    }
+
+    if(inBtn(mx,my,300,425,200,48)){
+        window.location.href = "index.html";
+        return;
+    }
+
+    return;
+}
 }, {passive:false});
 function dpadDir(dir){initAc();if(gs==='playing')kbuf=dir;}
 document.getElementById('dbu').addEventListener('touchstart',e=>{e.preventDefault();dpadDir('up');},{passive:false});
@@ -901,8 +939,9 @@ function drawGameOver() {
   ctx.fillStyle=C.gold; ctx.font='bold 20px monospace';
   ctx.fillText('+ '+runCoins+' coins  (total: '+coins+')',W/2,338);
   // Buttons
-  drawBtn('▶ PLAY AGAIN',192,368,196,48,'#225522','#aaffaa');
-  drawBtn('🛒 SHOP',452,368,172,48,'#222255','#aaaaff');
+drawBtn('▶ PLAY AGAIN',180,360,200,48,'#225522','#aaffaa');
+drawBtn('🛒 SHOP',420,360,180,48,'#222255','#aaaaff');
+drawBtn('BACK TO HUB',300,425,200,48,'#333333','#ffffff');
   ctx.textAlign='left';
 }
 
