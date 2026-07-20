@@ -24,6 +24,25 @@
             flex-direction: column; /* Stack elements vertically */
             padding: 20px; /* Add padding for smaller screens */
         }
+        #hubButton{
+    position:fixed;
+    right:20px;
+    top:50%;
+    transform:translateY(-50%);
+    background:#8f7a66;
+    color:#f9f6f2;
+    border:none;
+    border-radius:10px;
+    padding:14px 22px;
+    font-size:20px;
+    font-weight:bold;
+    cursor:pointer;
+    z-index:1000;
+}
+
+#hubButton:hover{
+    background:#9f8b77;
+}
 
         /* Main Game Container */
         .game-container {
@@ -289,6 +308,11 @@
     </style>
 </head>
 <body>
+
+<button id="hubButton"
+onclick="location.href='index.html'">
+Back to Hub
+</button>
 
     <div class="game-container">
         <div class="header">
