@@ -21,13 +21,49 @@ canvas {
 }
 #dpad {
   position:static;
-  margin-top:15px;
+  margin-top:35px;
   display:none;
+  width:100vw;
   user-select:none;
   -webkit-user-select:none;
 }
-.drow { display:flex; justify-content:center; }
-.dbtn { width:60px; height:60px; background:rgba(0,0,0,0.45); border:2px solid rgba(255,255,255,0.35); border-radius:10px; color:#fff; font-size:24px; line-height:60px; text-align:center; margin:3px; cursor:pointer; touch-action:none; -webkit-tap-highlight-color:transparent; }
+.drow {
+  display:flex;
+  justify-content:center;
+  width:100%;
+}
+
+.dbtn {
+  width:60px;
+  height:60px;
+  background:rgba(0,0,0,0.45);
+  border:2px solid rgba(255,255,255,0.35);
+  border-radius:10px;
+  color:#fff;
+  font-size:24px;
+  line-height:60px;
+  text-align:center;
+  margin:3px;
+  cursor:pointer;
+  touch-action:none;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* Make left and right stretch */
+#dbl,
+#dbr {
+  flex:1;
+  max-width:none;
+}
+
+/* Move up/down row slightly higher */
+#dbu,
+#dbd {
+  position:relative;
+  top:15px;
+  height:80px;
+  line-height:80px;
+}
 </style>
 </head>
 <body>
@@ -48,6 +84,183 @@ canvas {
 const canvas = document.getElementById('gc');
 const ctx = canvas.getContext('2d');
 const dpad = document.getElementById('dpad');
+
+const PASSWORD = "Jake Is The Best At Fortnite LOL";
+const PLAY_TIME = 24 * 60 * 60 * 1000; // 24 hours
+
+function checkPasswordLock() {
+  const unlockTime =
+    parseInt(localStorage.getItem("crossyUnlockTime")) || 0;
+
+  // Still unlocked
+  if (Date.now() < unlockTime) {
+    passwordLocked = false;
+    startLockTimer(unlockTime);
+    showPlayButton();
+    return;
+}
+
+  // Locked
+  showPasswordScreen();
+}
+
+function showPasswordScreen() {
+  const screen = document.createElement("div");
+
+  screen.id = "passwordScreen";
+
+  screen.style.position = "fixed";
+  screen.style.left = "0";
+  screen.style.top = "0";
+  screen.style.width = "100%";
+  screen.style.height = "100%";
+  screen.style.background = "#111";
+  screen.style.display = "flex";
+  screen.style.flexDirection = "column";
+  screen.style.justifyContent = "center";
+  screen.style.alignItems = "center";
+  screen.style.zIndex = "999999";
+  screen.style.color = "white";
+  screen.style.textAlign = "center";
+  screen.style.padding = "20px";
+
+  screen.innerHTML = `
+    <h1>Enter password to play Crossy Road for 24 hours.</h1>
+
+    <p style="max-width:600px;margin-top:20px;">
+      You must give something to Jake.
+      If Jake accepts what you give him,
+      he may give you the password in exchange
+      for 24 hours of play time.
+    </p>
+
+    <input
+      id="pwInput"
+      type="password"
+      style="
+        margin-top:30px;
+        padding:15px;
+        width:320px;
+        font-size:20px;
+      "
+    >
+
+    <button
+      id="pwButton"
+      style="
+        margin-top:20px;
+        padding:15px 30px;
+        font-size:20px;
+      "
+    >
+      Unlock
+    </button>
+
+    <p id="pwError"
+       style="color:red;margin-top:20px;"></p>
+  `;
+
+  document.body.appendChild(screen);
+
+  document
+    .getElementById("pwButton")
+    .onclick = () => {
+
+      const val =
+        document.getElementById("pwInput").value;
+
+      if (val === PASSWORD) {
+
+        const end =
+          Date.now() + PLAY_TIME;
+
+        localStorage.setItem(
+          "crossyUnlockTime",
+          end
+        );
+
+        screen.remove();
+
+passwordLocked = false;
+
+startLockTimer(end);
+
+showPlayButton();
+
+      } else {
+
+        document.getElementById(
+          "pwError"
+        ).textContent =
+          "Wrong password.";
+      }
+    };
+}
+
+function showPlayButton() {
+
+  const btn = document.createElement("div");
+
+  btn.style.position = "fixed";
+  btn.style.left = "0";
+  btn.style.top = "0";
+  btn.style.width = "100%";
+  btn.style.height = "100%";
+  btn.style.background = "#111";
+  btn.style.display = "flex";
+  btn.style.justifyContent = "center";
+  btn.style.alignItems = "center";
+  btn.style.zIndex = "999999";
+
+  btn.innerHTML = `
+    <button
+      style="
+        font-size:40px;
+        padding:25px 60px;
+        cursor:pointer;
+      "
+    >
+      ▶ PLAY
+    </button>
+  `;
+
+  document.body.appendChild(btn);
+
+  function startNow() {
+    btn.remove();
+    passwordLocked = false;
+    initAc();
+  }
+
+  btn.onclick = startNow;
+
+  document.addEventListener(
+    "keydown",
+    function startKBM() {
+      startNow();
+      document.removeEventListener(
+        "keydown",
+        startKBM
+      );
+    }
+  );
+}
+
+function startLockTimer(endTime) {
+
+  setInterval(() => {
+
+    if (Date.now() >= endTime) {
+
+      localStorage.removeItem(
+        "crossyUnlockTime"
+      );
+
+      location.reload();
+    }
+
+  }, 1000);
+}
 
 function fitCanvas() {
   const s = Math.min(window.innerWidth / 800, window.innerHeight / 600, 1);
@@ -89,24 +302,27 @@ const SKIN_COLORS = {
   shadow: {b:'#334466',d:'#223355',bl:'#6688aa',dk:'#111c2a',eye:'#ff4444',pu:'#800',tg:'#ff2244'},
 };
 const SKINS = [
-  {id:'green',  name:'Green Lizard',  price:0,   desc:'The original'},
-  {id:'blue',   name:'Blue Gecko',    price:50,  desc:'Cool & slippery'},
-  {id:'red',    name:'Red Dragon',    price:100, desc:'Born in fire'},
-  {id:'gold',   name:'Gold Lizard',   price:200, desc:'Bling bling'},
-  {id:'purple', name:'Chameleon',     price:150, desc:'Now you see me...'},
-  {id:'shadow', name:'Shadow Lizard', price:175, desc:'Creature of the night'},
+  {id:'green',  name:'Green Lizard',  price:0,    desc:'The original'},
+  {id:'blue',   name:'Blue Gecko',    price:500,  desc:'Cool & slippery'},
+  {id:'red',    name:'Red Dragon',    price:1000, desc:'Born in fire'},
+  {id:'gold',   name:'Gold Lizard',   price:2000, desc:'Bling bling'},
+  {id:'purple', name:'Chameleon',     price:1500, desc:'Now you see me...'},
+  {id:'shadow', name:'Shadow Lizard', price:1750, desc:'Creature of the night'},
 ];
 const ABILITIES = [
-  {id:'headstart',  name:'Head Start',    price:50,  desc:'Begin 5 rows ahead'},
-  {id:'shield',     name:'Shield',        price:80,  desc:'Survive one hit per run'},
-  {id:'dblcoins',   name:'Double Coins',  price:120, desc:'Earn 2x coins per run'},
-  {id:'slowscroll', name:'Slow Scroll',   price:100, desc:'Half scroll speed'},
+  {id:'headstart',  name:'Head Start',    price:500,  desc:'Begin 5 rows ahead'},
+  {id:'shield',     name:'Shield',        price:800,  desc:'Survive one hit per run'},
+  {id:'dblcoins',   name:'Double Coins',  price:1200, desc:'Earn 2x coins per run'},
+  {id:'slowscroll', name:'Slow Scroll',   price:1000, desc:'Half scroll speed'},
 ];
 
 // ===== STATE =====
 let gs = 'title';
+let passwordLocked = true;
 let fc = 0;
 let hs = 0;
+
+let showStatsResetPopup = false;
 
 // Shop/coin state
 let coins = 0;
@@ -358,6 +574,69 @@ canvas.addEventListener('click',e=>{
   }
 
   if(gs==='gameOver'){
+    if(showStatsResetPopup){
+
+  ctx.fillStyle='rgba(0,0,0,0.8)';
+  ctx.fillRect(0,0,W,H);
+
+  ctx.fillStyle='#181818';
+  ctx.fillRect(120,150,560,290);
+
+  ctx.fillStyle='#fff';
+  ctx.font='bold 22px monospace';
+  ctx.textAlign='center';
+
+  ctx.fillText(
+    'Reset 24 hour timer?',
+    W/2,
+    210
+  );
+
+  let unlock =
+    parseInt(localStorage.getItem("crossyUnlockTime")) || Date.now();
+
+  let left = Math.max(0, unlock-Date.now());
+
+  let hours = Math.floor(left/3600000);
+  let mins = Math.floor((left%3600000)/60000);
+
+  ctx.font='18px monospace';
+
+  ctx.fillText(
+    `Time left: ${hours}h ${mins}m`,
+    W/2,
+    255
+  );
+
+  drawBtn(
+    'YES',
+    220,
+    330,
+    150,
+    50,
+    '#771111',
+    '#fff'
+  );
+
+  drawBtn(
+    'NO',
+    430,
+    330,
+    150,
+    50,
+    '#333',
+    '#fff'
+  );
+
+  return;
+}
+
+    if(inBtn(mx,my,455,75,150,35)){
+      showStatsResetPopup = true;
+      return;
+    }
+
+    // popup drawing removed for now
 
     if(inBtn(mx,my,180,360,200,48)){
       startGame();
@@ -370,8 +649,8 @@ canvas.addEventListener('click',e=>{
       return;
     }
 
-    if(inBtn(mx,my,300,425,200,48)){
-      window.location.href = "index.html";
+    if(inBtn(mx,my,300,405,200,48)){
+      window.location.href = "../index.html";
       return;
     }
 
@@ -393,12 +672,54 @@ function touchToCanvas(touch) {
     y: (touch.clientY - r.top)  * (H / r.height)
   };
 }
-canvas.addEventListener('touchstart', e => {
+canvas.addEventListener('pointerdown', e => {
   e.preventDefault();
   initAc();
-  const {x:mx, y:my} = touchToCanvas(e.touches[0]);
+
+  const r = canvas.getBoundingClientRect();
+  const mx = (e.clientX - r.left) * (W / r.width);
+  const my = (e.clientY - r.top) * (H / r.height);
   if(gs==='title'){startGame();return;}
 if(gs==='gameOver'){
+
+  if(showStatsResetPopup){
+
+    if(inBtn(mx,my,220,330,150,50)){
+
+      localStorage.removeItem("crossyUnlockTime");
+
+      showStatsResetPopup=false;
+
+      showPasswordScreen();
+
+      return;
+    }
+
+
+    if(inBtn(mx,my,430,330,150,50)){
+
+      showStatsResetPopup=false;
+
+      return;
+    }
+
+  }
+
+
+  if(inBtn(mx,my,455,75,150,35)){
+    showStatsResetPopup = true;
+    return;
+  }
+  if(inBtn(mx,my,455,75,150,35)){
+  showStatsResetPopup = true;
+  return;
+}
+
+    if(inBtn(mx,my,455,75,150,35)){
+        localStorage.removeItem("crossyUnlockTime");
+        return;
+    }
+
     if(inBtn(mx,my,180,360,200,48)){
         startGame();
         return;
@@ -410,13 +731,23 @@ if(gs==='gameOver'){
         return;
     }
 
-    if(inBtn(mx,my,300,425,200,48)){
-        window.location.href = "index.html";
+    if(inBtn(mx,my,300,405,200,48)){
+        window.location.href = "../index.html";
         return;
     }
 
     return;
 }
+
+if(gs==='shop'){
+    handleShopClick(mx,my);
+    draw();
+    return;
+}
+}, {passive:false});
+
+canvas.addEventListener('touchend', e=>{
+    e.preventDefault();
 }, {passive:false});
 function dpadDir(dir){initAc();if(gs==='playing')kbuf=dir;}
 document.getElementById('dbu').addEventListener('touchstart',e=>{e.preventDefault();dpadDir('up');},{passive:false});
@@ -938,27 +1269,59 @@ function drawBtn(label, x, y, w, h, col, textCol) {
 }
 function inBtn(mx,my,x,y,w,h){return mx>=x&&mx<=x+w&&my>=y&&my<=y+h;}
 
+function getRemainingTime() {
+  const end =
+    parseInt(localStorage.getItem("crossyUnlockTime")) || 0;
+
+  let ms = end - Date.now();
+
+  if (ms < 0) ms = 0;
+
+  const hrs = Math.floor(ms / 3600000);
+  const mins = Math.floor((ms % 3600000) / 60000);
+  const secs = Math.floor((ms % 60000) / 1000);
+
+  return `${hrs}h ${mins}m ${secs}s`;
+}
+
 function drawGameOver() {
-  ctx.fillStyle='rgba(0,0,0,0.62)'; ctx.fillRect(0,0,W,H);
-  ctx.fillStyle='rgba(18,18,18,0.94)'; ctx.fillRect(160,130,480,340);
-  ctx.strokeStyle='#cc2222'; ctx.lineWidth=3; ctx.strokeRect(160,130,480,340); ctx.lineWidth=1;
+  ctx.fillStyle='rgba(0,0,0,0.62)';
+  ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='rgba(18,18,18,0.94)'; ctx.fillRect(160,120,480,390);
+ctx.strokeStyle='#cc2222'; ctx.lineWidth=3; ctx.strokeRect(160,120,480,390); ctx.lineWidth=1;
   ctx.fillStyle='#ff4444'; ctx.font='bold 46px monospace'; ctx.textAlign='center';
-  ctx.fillText('GAME OVER',W/2,196);
+ctx.textAlign='left';
+
+drawBtn('RESET TIMER',455,75,150,35,'#553333','#ffffff');
+
+ctx.fillText('GAME OVER',285,165);
   const msgs={car:'Squished by a car!',train:'Hit by a train!',water:'Fell in the river!',offscreen:'Left behind!'};
   ctx.fillStyle='#aaa'; ctx.font='18px monospace';
-  ctx.fillText(msgs[pl.deathType]||'You died!',W/2,232);
+  ctx.textAlign='left';
+ctx.fillText(msgs[pl.deathType]||'You died!',285,200);
   ctx.fillStyle=C.score; ctx.font='bold 26px monospace';
-  ctx.fillText('Score: '+maxNorth,W/2,274);
+  ctx.textAlign='left';
+ctx.fillText('Score: '+maxNorth,250,255);
   if(maxNorth>=hs&&maxNorth>0){ctx.fillStyle=C.gold;ctx.font='bold 18px monospace';ctx.fillText('★ NEW BEST! ★',W/2,302);}
-  else{ctx.fillStyle='#888';ctx.font='16px monospace';ctx.fillText('Best: '+hs,W/2,302);}
+  else{
+  ctx.fillStyle='#888';
+  ctx.font='16px monospace';
+  ctx.textAlign='right';
+  ctx.fillText('Best: '+hs,550,255);
+}
   // Coins earned
   ctx.fillStyle=C.gold; ctx.font='bold 20px monospace';
-  ctx.fillText('+ '+runCoins+' coins  (total: '+coins+')',W/2,338);
-  // Buttons
-drawBtn('▶ PLAY AGAIN',180,360,200,48,'#225522','#aaffaa');
-drawBtn('🛒 SHOP',420,360,180,48,'#222255','#aaaaff');
-drawBtn('BACK TO HUB',300,425,200,48,'#333333','#ffffff');
   ctx.textAlign='left';
+ctx.fillText('+ '+runCoins+' coins',250,300);
+
+ctx.textAlign='right';
+ctx.fillText('Total: '+coins+' 🪙',550,300);
+  // Buttons
+drawBtn('▶ PLAY AGAIN',180,345,200,48,'#225522','#aaffaa');
+drawBtn('🛒 SHOP',420,345,180,48,'#222255','#aaaaff');
+drawBtn('BACK TO HUB',300,405,200,48,'#333333','#ffffff');
+
+ctx.textAlign='left';
 }
 
 function drawMiniLizard(cx,cy,skinId,scale) {
@@ -1045,9 +1408,6 @@ function drawShop() {
 }
 
 function handleShopClick(mx,my) {
-  // Tabs
-  if(inBtn(mx,my,20,68,165,36)) { shopTab='skins'; return; }
-  if(inBtn(mx,my,200,68,165,36)) { shopTab='abilities'; return; }
   // Back
   if(inBtn(mx,my,20,H-56,140,40)) { gs='gameOver'; return; }
   // Item cards
@@ -1096,7 +1456,6 @@ function update() {
   updPfx();
   cull();
 }
-
 // ===== DRAW =====
 function draw() {
   dpad.style.display = gs==='playing' ? 'block' : 'none';
@@ -1118,6 +1477,7 @@ function draw() {
 // ===== LOOP =====
 function loop() { update(); draw(); requestAnimationFrame(loop); }
 loadData();
+checkPasswordLock();
 loop();
 </script>
 </body>
