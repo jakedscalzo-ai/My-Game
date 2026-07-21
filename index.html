@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jake's Arcade Hub</title>
+
+<style>
+body{
+    margin:0;
+    background:black;
+    color:white;
+    font-family:Arial, sans-serif;
+}
+
+/* LEFT MENU */
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:250px;
+    height:100vh;
+    background:black;
+    padding:20px;
+    box-sizing:border-box;
+    overflow-y:auto;
+}
+
+/* TITLE */
+h1{
+    color:cyan;
+    text-align:center;
+    text-shadow:0 0 15px cyan;
+    margin-top:0;
+}
+
+/* BUTTONS */
+button{
+    width:100%;
+    padding:12px;
+    margin-bottom:12px;
+    font-size:16px;
+    font-weight:bold;
+    border:none;
+    border-radius:10px;
+    background:cyan;
+    color:black;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+button:hover{
+    background:white;
+    transform:scale(1.03);
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+
+    <h1>🎮 Arcade Hub</h1>
+
+    <button onclick="location.href='neondash.html'">
+        ⚡ Neon Dash
+    </button>
+
+    <button onclick="location.href='rhythm.html'">
+        🎹 Piano Game
+    </button>
+
+    <button onclick="location.href='snake.html'">
+        🐍 Snake (kbm only)
+    </button>
+
+    <button onclick="location.href='level-devil.html'">
+        🥷 level devil (kbm only)
+    </button>
+    <button onclick="location.href='crossyroad.html'">
+         🚗 crossy road
+    </button>
+    <button onclick="location.href='2048.html'">
+         🧩 2048
+    </button>
+    <!-- Add more downloaded games here later -->
+
+</div>
+
+</body>
+</html>
